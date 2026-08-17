@@ -1,301 +1,150 @@
-# OBS-Live4Bilibili-Settings
+# JLiverTool (增强版)
 
-> 记录 OBS 设置、使用到的插件等，用于 Bilibili 直播与视频投稿的全流程配置参考。
+[![GitHub release (latest by date)](https://img.shields.io/github/downloads/xinrea/jlivertool/total.svg)](https://github.com/Xinrea/JLiverTool/releases)
 
-本仓库记录了基于 OBS Studio 30.2.3 的 Bilibili 直播配置方案，通过插件实现**绕过哔哩哔哩直播姬直接用 OBS 推流**，并集成弹幕显示与视频投稿工具，覆盖从直播推流到录播投稿的完整工作流。
+> [!IMPORTANT]
+> **本项目的原始地址：[https://github.com/Xinrea/JLiverTool](https://github.com/Xinrea/JLiverTool)**
+>
+> 本仓库基于原项目进行功能增强，核心代码版权归原作者所有。如有任何问题，请优先访问原仓库获取官方版本。
 
----
+> [!NOTE]
+> 本项目自 3.0.0 版本开始，使用 Rust 重构，并使用 GPUI 框架；旧 Electron 版本请参考 [2.4.4](https://github.com/Xinrea/JLiverTool/releases/tag/2.4.4) 版本。
 
-## 目录
+## 本仓库新增 / 增强功能
 
-- [OBS 场景配置](#obs-场景配置)
-- [OBS 设置详情](#obs-设置详情)
-  - [输出 - 直播](#输出---直播)
-  - [视频](#视频)
-  - [输出 - 录像](#输出---录像)
-  - [高级](#高级)
-- [使用到的插件](#使用到的插件)
-  - [插件 1：obs-bilibili-stream](#插件-1obs-bilibili-stream)
-  - [插件 2：LAPLACE Chat](#插件-2laplace-chat)
-  - [插件 3：Biliup App](#插件-3biliup-app)
-- [注意事项](#注意事项)
+本增强版在原版 JLiverTool 基础上增加了以下实用功能：
 
----
+### ✨ 鼠标穿透（可自定义快捷键，支持一键切换）
 
-## OBS 场景配置
+- 一键开启 / 关闭窗口鼠标穿透，窗口变得"透明可点击"，方便在直播时将工具窗口覆盖在 OBS 画面上而不遮挡操作
+- **支持自定义全局快捷键**（默认 `Ctrl+Shift+P`），修改快捷键后旧快捷键自动失效，避免冲突
+- 穿透状态下再按一次快捷键即可关闭，无需通过托盘菜单操作
+- 同时支持系统托盘菜单中切换穿透状态
 
-![OBS 场景](images/obs-scene.png)
+### 🎨 UI 色彩根据礼物 / SC 价值动态变化
 
+- 礼物记录条目根据礼物价格高低显示不同的颜色深度，高价值礼物一眼识别
+- 醒目留言（SuperChat / SC）根据金额等级自动应用对应的背景色和边框色，与 B 站官方视觉风格一致
+- 视觉层次分明，高价值互动不再错过
 
-## OBS 设置详情
+### 🔍 主界面透明度可调
 
-### 输出 - 直播
+- 在设置中自由调整主界面窗口的透明度（0% ~ 100%）
+- 适用于覆盖在直播画面 / OBS 场景上作为弹幕叠加层使用
+- 支持独立的 Dashboard（合并视图）透明度设置
 
-![输出-直播设置](images/obs-settings-output-stream.png)
+### 🪟 主界面一键开关独立窗口
 
-| 设置项 | 参数值 |
-|:---|:---|
-| 输出模式 | 高级 |
-| 音轨 | 1 |
-| 音频编码器 | FFmpeg AAC |
-| 视频编码器 | NVIDIA NVENC H.264 |
-| 速率控制 | CBR |
-| 码率 | 10000 Kbps |
-| 关键帧间隔 | 2 s |
-| 预设 | P5：慢速（较高质量） |
-| 调节 | 高质量 |
-| 多次编码模式 | 二次编码（1/4 分辨率） |
-| 配置 | high |
-| 前向考虑 | 未勾选 |
-| 心理视觉调整 | 已勾选 |
-| GPU | 0 |
-| 最大 B 帧 | 2 |
+- 顶部菜单栏按钮即可快速打开 / 关闭：
+  - 🎁 礼物窗口
+  - 💬 醒目留言（SC）窗口
+  - 📊 统计数据窗口
+  - 👥 观众列表 / 高能榜窗口
+  - ⚙️ 设置窗口
+- 各窗口独立置顶、独立调节透明度，无需额外操作
 
-### 视频
+### 🅰️ 送礼用户用户名拼音 / 罗马音标注
 
-![视频设置](images/obs-settings-video.png)
-
-| 设置项 | 参数值 |
-|:---|:---|
-| 基础（画布）分辨率 | 2560x1440 |
-| 输出（缩放）分辨率 | 2560x1440 |
-| 缩小算法 | 分辨率相符，不需要缩小 |
-| 整数帧率 | 100 |
-
-> 画布与输出分辨率一致，无需缩放，保证画质无损。
-
-### 输出 - 录像
-
-![输出-录像设置](images/obs-settings-output-record.png)
-
-| 设置项 | 参数值 |
-|:---|:---|
-| 输出模式 | 高级 |
-| 类型 | 标准 |
-| 录像路径 | `E:/Video Tool/Stdio/Media/REC` |
-| 录像格式 | Matroska 视频 (.mkv) |
-| 视频编码器 | NVIDIA NVENC H.264 |
-| 音频编码器 | FFmpeg AAC |
-| 音轨 | 1、2、3 |
-| 重新缩放输出 | 已禁用 |
-| 自动分割文件 | 未勾选 |
-| 速率控制 | CBR |
-| 码率 | 16000 Kbps |
-| 关键帧间隔 | 0 s（自动） |
-| 预设 | P5：慢速（较高质量） |
-| 调节 | 高质量 |
-| 多次编码模式 | 二次编码（1/4 分辨率） |
-| 配置 | high |
-| 心理视觉调整 | 已勾选 |
-| GPU | 0 |
-| 最大 B 帧 | 2 |
-
-> 录像码率（16 Mbps）高于直播码率（10 Mbps），兼顾直播流畅度与录播画质。MKV 封装容错性好，适合长时间录制。启用 3 轨音频为后期编辑预留空间。
-
-### 高级
-
-![高级设置](images/obs-settings-advanced.png)
-
-#### 常规
-
-| 设置项 | 参数值 |
-|:---|:---|
-| 进程优先级 | 正常 |
-| 退出时显示警告（有活动输出时） | 已勾选 |
-
-#### 视频
-
-| 设置项 | 参数值 |
-|:---|:---|
-| 渲染器 | Direct3D 11 |
-| 色彩格式 | NV12（8 位, 4:2:0, 2 个平面） |
-| 色彩空间 | Rec. 601 |
-| 色彩范围 | 常规 (Limited) |
-| SDR 白电平 | 296 nits |
-| HDR 标称峰值电平 | 1000 nits |
-
-#### 录像
-
-| 设置项 | 参数值 |
-|:---|:---|
-| 文件名格式 | `%CCYY-%MM-%DD %hh-%mm-%ss` |
-| 如果文件存在则覆盖 | 未勾选 |
-| 自动封装至 mp4 格式 | 未勾选 |
-| 回放文件名前缀 | Replay |
-
-#### 直播延迟
-
-| 设置项 | 参数值 |
-|:---|:---|
-| 开启 | 未勾选 |
-| 延迟时间 | 20 s（未启用） |
-| 估计内存使用量 | 25 MB |
-
-#### 自动重连
-
-| 设置项 | 参数值 |
-|:---|:---|
-| 开启 | 已勾选 |
-| 重试延迟 | 2 s |
-| 最大重试次数 | 25 |
-
-#### 网络
-
-| 设置项 | 参数值 |
-|:---|:---|
-| IP 族 | IPv4 和 IPv6（默认） |
-| 绑定到 IP | 默认 |
-| 动态调整码率以应对网络拥堵 (Beta) | 未勾选 |
-| 开启网络优化 | 未勾选 |
-| 开启 TCP pacing | 未勾选 |
+- 在礼物、SC、舰长等互动记录中，自动为中文用户名标注**拼音（带声调）**，日文用户名标注**罗马音（Romaji）**
+- 主播在念 ID 感谢时无需再查读音，提升直播流畅度
+- 标注信息在 TTS 语音播报中同步支持
 
 ---
 
-## 使用到的插件
+## 使用说明
 
-### 插件 1：obs-bilibili-stream
+### 1. 主界面（弹幕界面）
 
-![obs-bilibili-stream 插件](images/plugin-bilibili-stream.png)
+<table>
+  <tr>
+    <td>
+      <img src="docs/public/mainwindow.png" alt="screenshot" width="500">
+    </td>
+    <td>
+      <img src="docs/public/command.png" alt="screenshot" width="500">
+    </td>
+  </tr>
+</table>
 
-- **仓库地址**：<https://github.com/Zarosmm/obs-bilibili-stream>
-- **当前版本**：2.1.1
-- **许可证**：GPL-2.0
+主界面分为三个大的部分：顶部菜单栏、弹幕列表、底部状态栏。
+顶部菜单栏从左到右分别为：
 
-#### 功能简介
+- 置顶
+- 礼物窗口
+- 醒目留言窗口
+- 统计窗口
+- 观众列表窗口
+- 设置窗口
 
-OBS Studio 的 Bilibili 直播插件，用于**绕过哔哩哔哩直播姬**，直接在 OBS 中完成 Bilibili 直播推流。无其他软件和粉丝数要求。
+底部状态栏显示当前的直播间标题，且提供了弹幕命令输入。输入普通内容后点击发送按钮即可发送弹幕。如果输入特殊命令，则会执行特殊功能。
+目前支持的指令有：
 
-核心功能：
+- `/title <new title>` - 修改直播间标题
+- `/bye` - 关闭直播
 
-- 扫码登录 Bilibili 账号
-- 在 OBS 内直接更新直播间标题、分区信息
-- 自动获取 RTMP 推流地址和推流码
-- 通过 OBS 菜单栏 `Bilibili 直播` 一键管理直播流程
+### 2. 礼物窗口
 
-#### 安装方法
+![giftwindow](docs/public/giftwindow.png)
 
-1. 从 [Releases 页面](https://github.com/Zarosmm/obs-bilibili-stream/releases) 下载最新 `bilibili-stream-for-obs-*-windows-x64.zip`
-2. 解压后将文件夹移动至 `C:\ProgramData\obs-studio\plugins`
-3. 确保目录结构如下：
-   ```
-   C:\ProgramData\obs-studio\plugins\
-   └── bilibili-stream-for-obs\
-       ├── bin\
-       │   └── 64bit\
-       │       └── bilibili-stream-for-obs.dll
-       └── data\
-           └── locale\
-               └── (相关的 .ini 语言文件)
-   ```
-4. 重启 OBS Studio，菜单栏将出现 `Bilibili 直播` 选项
+礼物窗口用于单独显示礼物和舰长记录。
 
-#### 使用流程
+### 3. 醒目留言界面
 
-1. **登录**：`Bilibili 直播` → `登录` → 扫码登录
-2. **更新直播间信息**：`Bilibili 直播` → `更新直播间信息` → 设置标题、分区
-3. **开始直播**：`Bilibili 直播` → `开始直播` → 复制 RTMP 地址和推流码 → 填入 OBS `设置` → `输出` → `流`
-4. **结束直播**：OBS 点击 `停止直播` → `Bilibili 直播` → `停止直播`
+![superchatwindow](docs/public/superchatwindow.png)
 
-> 详细安装与使用说明（含 macOS / Linux）请参阅 [插件官方 README](https://github.com/Zarosmm/obs-bilibili-stream/blob/master/README.md)。
+### 4. 设置界面
 
----
+![设置窗口](docs/public/settings.png)
 
-### 插件 2：LAPLACE Chat
+当登录账号与直播间号匹配时，直播间标题设置和开/关播按钮才可使用。
 
-![LAPLACE Chat 插件](images/plugin-laplace-chat.png)
+## 安装说明
 
-- **网址**：<https://chat.laplace.live/>
-- **类型**：网页应用（无需安装，OBS 浏览器源接入）
+### Windows
 
-#### 功能简介
+直接下载 Release 页面中的 `.exe` 安装包或便携版，双击运行即可。
 
-哔哩哔哩直播弹幕机，实现在直播画面中添加弹幕显示，并在网页端汇总直播间弹幕信息。其中 100% 的代码由 LLM 生成。
+### macOS
 
-核心功能：
+由于应用未经 Apple 签名，首次运行时可能提示"文件已损坏"。请在终端中执行以下命令：
 
-- 弹幕、醒目留言（SC）、礼物等事件实时显示
-- 粉丝勋章、房管标记、大航海标记、排行榜标记等元素控制
-- 置顶礼物条、礼物特效展示
-- 基于礼物金额的高亮与特效阈值自定义
-- 事件数量限制与付费事件过滤
-- 支持匿名直连 / 开放平台两种连接方式
-- 可视化样式自定义（CSS）
+```bash
+xattr -cr /Applications/JLiverTool.app
+```
 
-#### 配置参考（基础标签页）
+### Arch Linux
 
-| 配置区块 | 已启用项 |
-|:---|:---|
-| 基础元素控制 | 粉丝勋章、房管标记、大航海标记、只显示亮灯的粉丝勋章、用户名、用户头像、头像框、当前排行榜标记 |
-| 事件类型 | 弹幕、醒目留言 |
-| 事件显示控制 | 显示自动弹幕 |
-| 数值设置 | 隐藏低于 1 元的付费事件、礼物高亮阈值 29.99、限制事件数量 50 |
-| 置顶礼物条 | 已开启（阈值 29.99，限制 10 条） |
-| 礼物特效 | 已开启（阈值 59） |
-| 连接方式 | 开放平台 |
+下载 `PKGBUILD` 和 `jlivertool_*_x86_64.tar.gz` 到同一目录，然后执行：
 
-#### OBS 接入方法
+```bash
+makepkg -si
+```
 
-1. 在 <https://chat.laplace.live/> 完成配置
-2. 选择连接方式（推荐开放平台）并输入直播间房间号
-3. 复制生成的 OBS 弹幕机链接
-4. 在 OBS 中添加 `浏览器源`，粘贴链接
-5. 调整浏览器源的尺寸与层级位置（弹幕层置于游戏画面之上）
+## 开发说明
 
-> 详细使用方法请访问 [插件官网](https://chat.laplace.live/) 的「介绍」与「使用方法」页面。
+### Run
 
----
+```bash
+cargo run
+```
 
-### 插件 3：Biliup App
+### Build
 
-![Biliup App 插件](images/plugin-biliup.png)
+```bash
+# Install cargo-packager
+cargo install cargo-packager --locked
 
-- **仓库地址**：<https://github.com/biliup/biliup-app-new>
-- **当前版本**：v1.2.3
-- **技术栈**：Tauri + Vue 3
-- **许可证**：Apache-2.0 / MIT（双协议）
+# Build release binary first
+cargo build --release
 
-#### 功能简介
+# Create installers (run from project root)
+cargo packager --release
+```
 
-B 站视频上传管理工具，可上传长视频、分 P 视频，支持多账号投稿等强大功能。适合游戏录播等连载型内容的批量投稿。
+## 致谢 & 原项目声明
 
-核心功能：
+再次感谢原作者 [Xinrea](https://github.com/Xinrea) 开发的 JLiverTool，本仓库仅做功能增强。
 
-- **视频管理**：拖拽上传、批量处理、文件夹监控自动上传
-- **模板系统**：可复用模板、一键重置、从现有视频复制配置
-- **编辑稿件**：联合投稿、简介 @好友、稿件状态显示、多稿件同步投稿
-- **多账号支持**：多个 B 站账号同时登录管理
-- **分 P 自动排序**：按时间戳命名文件自动识别并排序
-
-#### 下载安装
-
-从 [Release 页面](https://github.com/biliup/biliup-app-new/releases) 下载对应平台的安装包。
-
-#### 快捷键
-
-| 快捷键 | 功能 |
-|:---|:---|
-| Ctrl + S | 保存当前模板 |
-| Ctrl + R | 重置模板到保存前状态 |
-| Ctrl + F5 | 刷新应用页面 |
-
-#### 系统要求
-
-| 平台 | 要求 |
-|:---|:---|
-| Windows | Windows 10 及以上 |
-| macOS | macOS 10.15 及以上 |
-| Linux | 现代 Linux 发行版 |
-
-> 详细功能说明请参阅 [插件官方 README](https://github.com/biliup/biliup-app-new/blob/master/README.md)。
-
----
-
-
-## 注意事项
-
-- **OBS 版本**：本配置基于 OBS Studio 30.2.3，obs-bilibili-stream 插件要求 OBS 30.0 或更高版本
-- **硬件要求**：视频编码使用 NVIDIA NVENC H.264，需要 NVIDIA 显卡支持；2K@100FPS 直播对 GPU 编码能力有一定要求
-- **网络要求**：直播码率 10 Mbps，需保证稳定上行带宽；自动重连已启用（2 秒间隔，最多 25 次）
-- **录像格式**：使用 MKV 封装，如需 MP4 格式可在直播结束后通过 OBS `文件 → 录像重新封装` 转换
-- **插件更新**：建议定期检查各插件 Release 页面获取最新版本
-- **Biliup 已知问题**：上传时如果持续不更新进度，删除任务后手动切换线路再上传
+- **原项目仓库**：[https://github.com/Xinrea/JLiverTool](https://github.com/Xinrea/JLiverTool)
+- **原项目文档站**：[https://xinrea.github.io/JLiverTool/](https://xinrea.github.io/JLiverTool/)
+- 本仓库的发行版仅用于测试和交流，如需稳定版本请从原项目 Release 下载。
